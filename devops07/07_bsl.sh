@@ -42,7 +42,7 @@ help() {
     echo
 }
 
-# There's no canonical best to detect a Linux distro because distros vary wildly and the semantics for /etc/os-release are, accordingly, very broad.
+# There's no canonical best way to detect a Linux distro because distros vary wildly and the semantics for /etc/os-release are, accordingly, very broad.
 # (There's also the remote possibility of triggering a malicious execution, since this file is globally writable.)
 # For more info on the types of shenanigans possible there: https://unix.stackexchange.com/a/433245
 # Even though it's not actually built for this use case, the best way is probably still to just grep through it for ID and ID_LIKE, since uname isn't sufficient here and there's not really a better way to do it without adding a third-party dependency.
