@@ -42,6 +42,37 @@ help() {
     echo
 }
 
+# Get options & perform option/parameter validation
+getopts_and_validation() {
+    while [[ "$#" -gt 0 ]]; do
+        #echo "D: Parsing arg \"$1\""
+        arg="$1"
+        case "$1" in
+            # convert "--opt=the value" to --opt "the value".
+            # quotes around the = sign is a workaround for a bug in emacs syntax parsing
+            # Source: https://stackoverflow.com/a/6310937
+            --*'='*) shift; set -- "${arg%%=*}" "${arg#*=}" "$@"; continue;;
+            -h|--help)  # display help text and exit
+                help
+                exit;;
+            -d=*|--distro=*) # set distro (equals-separated)
+                #echo "D: Setting \$distro to \"${1#*=}\""
+                distro="${1#*=}"
+                validate_distro "$distro"
+                shift;;
+            -d|--distro)  # set distro (space-separated)
+                #echo "D: Setting \$distro to \"$2\""
+                distro="$2"
+                validate_distro "$distro"
+                shift; shift;;
+            -*|--*) # any other parameters
+                die "E: Invalid option \"$arg\"";;
+            *)
+                break;; # end of parameters list
+        esac
+    done
+}
+
 # There's no canonical best way to detect a Linux distro because distros vary wildly and the semantics for /etc/os-release are, accordingly, very broad.
 # (There's also the remote possibility of triggering a malicious execution, since this file is globally writable.)
 # For more info on the types of shenanigans possible there: https://unix.stackexchange.com/a/433245
@@ -110,37 +141,6 @@ enable_nginx() {
             die "E: nginx failed to start"
         fi
     fi
-}
-
-# Get options & perform option/parameter validation
-getopts_and_validation() {
-    while [[ "$#" -gt 0 ]]; do
-        #echo "D: Parsing arg \"$1\""
-        arg="$1"
-        case "$1" in
-            # convert "--opt=the value" to --opt "the value".
-            # quotes around the = sign is a workaround for a bug in emacs syntax parsing
-            # Source: https://stackoverflow.com/a/6310937
-            --*'='*) shift; set -- "${arg%%=*}" "${arg#*=}" "$@"; continue;;
-            -h|--help)  # display help text and exit
-                help
-                exit;;
-            -d=*|--distro=*) # set distro (equals-separated)
-                #echo "D: Setting \$distro to \"${1#*=}\""
-                distro="${1#*=}"
-                validate_distro "$distro"
-                shift;;
-            -d|--distro)  # set distro (space-separated)
-                #echo "D: Setting \$distro to \"$2\""
-                distro="$2"
-                validate_distro "$distro"
-                shift; shift;;
-            -*|--*) # any other parameters
-                die "E: Invalid option \"$arg\"";;
-            *)
-                break;; # end of parameters list
-        esac
-    done
 }
 
 main() {
