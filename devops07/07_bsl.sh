@@ -42,6 +42,26 @@ help() {
     echo
 }
 
+# There's no canonical best way to detect a Linux distro because distros vary wildly and the semantics for /etc/os-release are, accordingly, very broad.
+# (There's also the remote possibility of triggering a malicious execution, since this file is globally writable.)
+# For more info on the types of shenanigans possible there: https://unix.stackexchange.com/a/433245
+# Even though it's not actually built for this use case, the best way is probably still to just grep through it for ID and ID_LIKE, since uname isn't sufficient here and there's not really a better way to do it without adding a third-party dependency.
+# Note that parameter expansion requires bash 4 to be installed; it's used here to convert values to lowercase.
+# Sources for the code patterns used here: https://unix.stackexchange.com/a/498788, https://stackoverflow.com/a/27679748
+detect_distro() {
+    ID=$(grep -oP '(?<=^ID=).+' /etc/os-release | tr -d '"')
+    ID_LIKE=$(grep -oP '(?<=^ID_LIKE=).+' /etc/os-release | tr -d '"')
+    if [[ "${ID,,}" == "debian" || "${ID_LIKE,,}" == *"debian"* || "${ID,,}" == "ubuntu" || "${ID_LIKE,,}" == *"ubuntu"* ]] ; then
+        echo "I: Debian distro detected"
+        distro="debian"
+    elif [[ "${ID,,}" == "rhel" || "${ID_LIKE,,}" == *"rhel"* || "${ID,,}" == "centos" || "${ID_LIKE,,}" == *"centos"* ]] ; then
+        echo "I: Red Hat distro detected"
+        distro="redhat"
+    else
+        die "E: Distro not provided and autodetection failed. Exiting..."
+    fi
+}
+
 # Parameter validation: distro should be either "debian" or "redhat"
 validate_distro() {
     echo "$distro" | grep -E -q '^(debian)|(redhat)$' || die "E: Invalid distro \"$distro\" (should be either \"debian\" or \"redhat\")";
@@ -76,26 +96,6 @@ getopts_and_validation() {
                 break;; # end of parameters list
         esac
     done
-}
-
-# There's no canonical best way to detect a Linux distro because distros vary wildly and the semantics for /etc/os-release are, accordingly, very broad.
-# (There's also the remote possibility of triggering a malicious execution, since this file is globally writable.)
-# For more info on the types of shenanigans possible there: https://unix.stackexchange.com/a/433245
-# Even though it's not actually built for this use case, the best way is probably still to just grep through it for ID and ID_LIKE, since uname isn't sufficient here and there's not really a better way to do it without adding a third-party dependency.
-# Note that parameter expansion requires bash 4 to be installed; it's used here to convert values to lowercase.
-# Sources for the code patterns used here: https://unix.stackexchange.com/a/498788, https://stackoverflow.com/a/27679748
-detect_distro() {
-    ID=$(grep -oP '(?<=^ID=).+' /etc/os-release | tr -d '"')
-    ID_LIKE=$(grep -oP '(?<=^ID_LIKE=).+' /etc/os-release | tr -d '"')
-    if [[ "${ID,,}" == "debian" || "${ID_LIKE,,}" == *"debian"* || "${ID,,}" == "ubuntu" || "${ID_LIKE,,}" == *"ubuntu"* ]] ; then
-        echo "I: Debian distro detected"
-        distro="debian"
-    elif [[ "${ID,,}" == "rhel" || "${ID_LIKE,,}" == *"rhel"* || "${ID,,}" == "centos" || "${ID_LIKE,,}" == *"centos"* ]] ; then
-        echo "I: Red Hat distro detected"
-        distro="redhat"
-    else
-        die "E: Distro not provided and autodetection failed. Exiting..."
-    fi
 }
 
 # Debian: install nginx, if not installed already
