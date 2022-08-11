@@ -42,6 +42,11 @@ help() {
     echo
 }
 
+# Parameter validation: distro should be either "debian" or "redhat"
+validate_distro() {
+    echo "$distro" | grep -E -q '^(debian)|(redhat)$' || die "E: Invalid distro \"$distro\" (should be either \"debian\" or \"redhat\")";
+}
+
 # Get options & perform option/parameter validation
 getopts_and_validation() {
     while [[ "$#" -gt 0 ]]; do
@@ -91,11 +96,6 @@ detect_distro() {
     else
         die "E: Distro not provided and autodetection failed. Exiting..."
     fi
-}
-
-# Parameter validation: distro should be either "debian" or "redhat"
-validate_distro() {
-    echo "$distro" | grep -E -q '^(debian)|(redhat)$' || die "E: Invalid distro \"$distro\" (should be either \"debian\" or \"redhat\")";
 }
 
 # Debian: install nginx, if not installed already
