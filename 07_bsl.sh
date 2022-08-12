@@ -8,13 +8,13 @@
 # * Send a message of completion to the screen
 # 
 # Part 2: Multi-Distro Support (RHEL + Debian)
-# * The user can pass their distribution in as a parameter. For now the parameters are either “debian” or “redhat”
+# * The user can pass their distribution in as a parameter. For now the parameters are either "debian" or "redhat"
 # * If debian is passed in, the apt package manager should be used to install nginx
 # * If redhat is passed in, the yum or dnf package manager should be used to install apache
 # * The user should see a message about which package manager we are going to use for the install before it happens
 # 
 # Part 3: Extend for Usability
-# * If the user passes an “-h” or “--help” as a parameter, they should be get a message that tells them how to use the script
+# * If the user passes an "-h" or "--help" as a parameter, they should be get a message that tells them how to use the script
 # * If no distribution is included by the user, the same message should be shown to the user.
 # 
 # Bonus: Some Checks for Robustness
